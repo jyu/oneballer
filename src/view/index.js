@@ -3,11 +3,12 @@ var arena = $('#arena'),
     maxValueX = arena.width() - player.width(),
     maxValueY = arena.height() - player.height(),
     keysPressed = {},
-    distancePerIteration = 3
     playerX = 140,
     playerY = 140,
     projectiles = [],
-    projectileID = 0;
+    projectileID = 0,
+    projSpeed = 8,
+    playerSpeed = 5;
 
 var arenaDim = getPosition(document.getElementById("arena"));
 var arenaX = arenaDim.x;
@@ -15,15 +16,15 @@ var arenaY = arenaDim.y;
 
 function calculateNewValueX(oldValue, keyCode1, keyCode2) {
     var newValue = parseInt(oldValue, 10)
-                   - (keysPressed[keyCode1] ? distancePerIteration : 0)
-                   + (keysPressed[keyCode2] ? distancePerIteration : 0);
+                   - (keysPressed[keyCode1] ? playerSpeed : 0)
+                   + (keysPressed[keyCode2] ? playerSpeed : 0);
     return newValue < 0 ? 0 : newValue > maxValueX ? maxValueX : newValue;
 }
 
 function calculateNewValueY(oldValue, keyCode1, keyCode2) {
     var newValue = parseInt(oldValue, 10)
-                   - (keysPressed[keyCode1] ? distancePerIteration : 0)
-                   + (keysPressed[keyCode2] ? distancePerIteration : 0);
+                   - (keysPressed[keyCode1] ? playerSpeed : 0)
+                   + (keysPressed[keyCode2] ? playerSpeed : 0);
     return newValue < 0 ? 0 : newValue > maxValueY ? maxValueY : newValue;
 }
 
@@ -44,12 +45,9 @@ setInterval(function() {
     });
     for(var i = 0; i < projectiles.length; i++) {
       var projectile = projectiles[i];
-      var xDiff = projectile.endX - projectile.x;
-      var yDiff = projectile.endY - projectile.y;
-      var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
       $('#' + projectile.id).css({
-        left: projectile.x += 4 * xDiff / magnitude,
-        top: projectile.y += 4 * yDiff / magnitude,
+        left: projectile.x += projectile.dx,
+        top: projectile.y += projectile.dy,
       });
     }
 }, 20);
@@ -59,9 +57,12 @@ arena.click(getClickPosition);
 function getClickPosition(e) {
   var xPosition = e.clientX - arenaX;
   var yPosition = e.clientY - arenaY;
+  var xDiff = xPosition - playerX;
+  var yDiff = yPosition - playerY;
+  var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
   projectiles.push({
-     'endX': xPosition,
-     'endY': yPosition,
+     'dx':  projSpeed * xDiff / magnitude,
+     'dy': projSpeed * yDiff / magnitude,
      'x': playerX,
      'y': playerY,
      'id': "projectile" + projectileID,
