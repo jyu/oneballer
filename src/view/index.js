@@ -14,40 +14,58 @@ var arenaDim = getPosition(document.getElementById("arena"));
 var arenaX = arenaDim.x;
 var arenaY = arenaDim.y;
 
-function calculateNewValueX(oldValue, keyCode1, keyCode2) {
-    var newValue = parseInt(oldValue, 10)
-                   - (keysPressed[keyCode1] ? playerSpeed : 0)
-                   + (keysPressed[keyCode2] ? playerSpeed : 0);
-    return newValue < 0 ? 0 : newValue > maxValueX ? maxValueX : newValue;
+function calculateNewPlayerX(oldX, keyMinus, keyPlus) {
+    var newX = parseInt(oldX, 10)
+                   - (keysPressed[keyMinus] ? playerSpeed : 0)
+                   + (keysPressed[keyPlus] ? playerSpeed : 0);
+    return newX < 0 ? 0 : newX > maxValueX ? maxValueX : newX;
 }
 
-function calculateNewValueY(oldValue, keyCode1, keyCode2) {
-    var newValue = parseInt(oldValue, 10)
-                   - (keysPressed[keyCode1] ? playerSpeed : 0)
-                   + (keysPressed[keyCode2] ? playerSpeed : 0);
-    return newValue < 0 ? 0 : newValue > maxValueY ? maxValueY : newValue;
+function calculateNewPlayerY(oldY, keyMinus, keyPlus) {
+    var newY = parseInt(oldY, 10)
+                   - (keysPressed[keyMinus] ? playerSpeed : 0)
+                   + (keysPressed[keyPlus] ? playerSpeed : 0);
+    return newY < 0 ? 0 : newY > maxValueY ? maxValueY : newY;
 }
 
 $(window).keydown(function(event) {
   keysPressed[event.which] = true; });
 $(window).keyup(function(event) { keysPressed[event.which] = false; });
 
+function calculateNewProjX(projectile) {
+  newX = projectile.x + projectile.dx;
+  if (newX > maxValueX || newX < 0) {
+    projectile.dx = projectile.dx * -1;
+    return projectile.x;
+  }
+  return newX;
+}
+
+function calculateNewProjY(projectile) {
+  newY = projectile.y + projectile.dy;
+  if (newY > maxValueY || newY < 0) {
+    projectile.dy = projectile.dy * -1;
+    return projectile.y;
+  }
+  return newY;
+}
+
 setInterval(function() {
     player.css({
         left: function(index ,oldValue) {
-            playerX = calculateNewValueX(oldValue, 65, 68);
+            playerX = calculateNewPlayerX(oldValue, 65, 68);
             return playerX;
         },
         top: function(index, oldValue) {
-            playerY = calculateNewValueY(oldValue, 87, 83);
+            playerY = calculateNewPlayerY(oldValue, 87, 83);
             return playerY;
         }
     });
     for(var i = 0; i < projectiles.length; i++) {
       var projectile = projectiles[i];
       $('#' + projectile.id).css({
-        left: projectile.x += projectile.dx,
-        top: projectile.y += projectile.dy,
+        left: projectile.x = calculateNewProjX(projectile),
+        top: projectile.y = calculateNewProjY(projectile)
       });
     }
 }, 20);
