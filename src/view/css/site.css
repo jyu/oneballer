@@ -10,7 +10,7 @@
 }
 
 #player {
-    position:absolute; top:140px; left:140px;
+    position:absolute; top:200px; left:140px;
     width:20px; height:20px;
     background-color:black;
     border-radius: 50%;

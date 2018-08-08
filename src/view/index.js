@@ -63,6 +63,10 @@ setInterval(function() {
     });
     for(var i = 0; i < projectiles.length; i++) {
       var projectile = projectiles[i];
+      if (isIntersect(playerX, playerY, projectile.x, projectile.y)) {
+        alert("u died");
+        projectiles = [];
+      }
       $('#' + projectile.id).css({
         left: projectile.x = calculateNewProjX(projectile),
         top: projectile.y = calculateNewProjY(projectile)
@@ -78,15 +82,30 @@ function getClickPosition(e) {
   var xDiff = xPosition - playerX;
   var yDiff = yPosition - playerY;
   var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+  var dx = projSpeed * xDiff / magnitude;
+  var dy = projSpeed * yDiff / magnitude
+  var projX = playerX;
+  var projY = playerY;
+  while(isIntersect(playerX, playerY, projX, projY)) {
+    projX += dx;
+    projY += dy;
+  }
   projectiles.push({
-     'dx':  projSpeed * xDiff / magnitude,
-     'dy': projSpeed * yDiff / magnitude,
-     'x': playerX,
-     'y': playerY,
+     'dx':  dx,
+     'dy': dy,
+     'x': projX,
+     'y': projY,
      'id': "projectile" + projectileID,
    });
   $('#arena').append('<div id="projectile' +  projectileID + '"class="projectile" style="top:' + playerY + 'px;left:' + playerX + 'px"></div>')
   projectileID += 1;
+}
+
+function isIntersect(x, y, projX, projY) {
+  var xDiff = x - projX;
+  var yDiff = y - projY;
+  var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+  return magnitude < 20;
 }
 
 function getPosition(el) {
