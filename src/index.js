@@ -24,10 +24,7 @@ app.get('/', function(req, res){
 });
 
 var players = 0;
-type Player = {
-  'id': number,
-  'socket': Object,
-};
+type Player = {'id': number, 'socket': Object};
 
 // List of rooms, which are arrays of players
 var rooms = [];

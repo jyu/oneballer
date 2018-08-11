@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js"
+    "clean": "rm -rf build && mkdir build",
+    "build-babel": "babel ./src --out-dir=./build --copy-files",
+    "build": "npm run clean && npm run build-babel",
+    "start": "npm run build && node ./build/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,5 +17,8 @@
     "flow": "^0.2.3",
     "request": "^2.87.0",
     "socket.io": "^2.1.1"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-flow-strip-types": "^6.22.0"
   }
 }
