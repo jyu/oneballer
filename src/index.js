@@ -1,3 +1,5 @@
+// @flow
+
 var express = require('express');
 var bodyParser = require("body-parser");
 var request = require('request');
@@ -8,6 +10,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json())
 app.use(express.static(__dirname + '/view'));
+// $FlowFixMe
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
@@ -21,18 +24,18 @@ app.get('/', function(req, res){
 });
 
 var players = 0;
-// Player Object
-// {
-//   'id': number,
-//   'socket': socketIO
-// }
+type Player =
+{
+  'id': number,
+  'socket': Object,
+}
 
 // List of rooms, which are arrays of players
 var rooms = [];
 
 // Input: Player Object
 // Output: Room index
-function addPlayerToRoom(player) {
+function addPlayerToRoom(player: Player) {
   // Check for free room
   for (var i = 0; i < rooms.length; i++) {
     if (rooms[i].length != 2) {
@@ -47,7 +50,7 @@ function addPlayerToRoom(player) {
 }
 
 // Input: Player Object
-function removePlayer(player, roomID) {
+function removePlayer(player: Player, roomID: number) {
   var room = rooms[roomID];
   var rmPlayer = -1;
   for (var i = 0; i < room.length; i++) {
@@ -61,21 +64,20 @@ function removePlayer(player, roomID) {
   }
 }
 
-io.on('connection', function(socket){
+io.on('connection', function(socket: Object){
   console.log('a user connected');
   players += 1;
   var player = {'id': players, 'socket': socket};
   var roomID = addPlayerToRoom(player);
-  console.log(roomID)
   console.log(rooms)
 
   socket.join(roomID);
+  socket.to(roomID).emit('player '+String(player.id)+' connected');
   socket.emit('room_id', roomID);
 
   socket.on('disconnect', function(){
     console.log('user disconnected');
     removePlayer(player, roomID);
-    console.log(player)
     console.log(rooms);
   });
 });
