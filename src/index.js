@@ -24,33 +24,35 @@ app.get('/', function(req, res){
 });
 
 var players = 0;
-type Player =
-{
+type Player = {
   'id': number,
   'socket': Object,
-}
+};
 
 // List of rooms, which are arrays of players
 var rooms = [];
 
-// Input: Player Object
-// Output: Room index
+type RoomResponse = {
+  'roomID': number,
+  'roomFull': bool,
+};
 function addPlayerToRoom(player: Player) {
   // Check for free room
   for (var i = 0; i < rooms.length; i++) {
-    if (rooms[i].length != 2) {
-      rooms[i].push(player);
-      return i;
+    var room = rooms[i];
+    if (room.length != 2) {
+      room.push(player);
+      return {'roomID': i, 'roomFull': room.length === 2};
     }
   }
   // No room has space
   var newRoom = [player];
   rooms.push(newRoom);
-  return rooms.length - 1;
+  return {'roomID': rooms.length - 1, 'roomFull': false};
 }
 
 // Input: Player Object
-function removePlayer(player: Player, roomID: number) {
+function removePlayer(player: Player, roomID: number): void {
   var room = rooms[roomID];
   var rmPlayer = -1;
   for (var i = 0; i < room.length; i++) {
@@ -68,10 +70,11 @@ io.on('connection', function(socket: Object){
   console.log('a user connected');
   players += 1;
   var player = {'id': players, 'socket': socket};
-  var roomID = addPlayerToRoom(player);
+  var roomInfo = addPlayerToRoom(player);
+  var roomID = roomInfo['roomID'];
   console.log(rooms)
-
   socket.join(roomID);
+
   socket.to(roomID).emit('player '+String(player.id)+' connected');
   socket.emit('room_id', roomID);
 
