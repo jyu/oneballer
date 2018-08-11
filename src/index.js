@@ -8,8 +8,74 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json())
 app.use(express.static(__dirname + '/view'));
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
-var server = app.listen(process.env.PORT || 8000, function () {
+var server = http.listen(process.env.PORT || 8000, function () {
 var port = server.address().port;
 console.log("App now running on port", port);
+});
+
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/view/index.html');
+});
+
+var players = 0;
+// Player Object
+// {
+//   'id': number,
+//   'socket': socketIO
+// }
+
+// List of rooms, which are arrays of players
+var rooms = [];
+
+// Input: Player Object
+// Output: Room index
+function addPlayerToRoom(player) {
+  // Check for free room
+  for (var i = 0; i < rooms.length; i++) {
+    if (rooms[i].length != 2) {
+      rooms[i].push(player);
+      return i;
+    }
+  }
+  // No room has space
+  var newRoom = [player];
+  rooms.push(newRoom);
+  return rooms.length - 1;
+}
+
+// Input: Player Object
+function removePlayer(player, roomID) {
+  var room = rooms[roomID];
+  var rmPlayer = -1;
+  for (var i = 0; i < room.length; i++) {
+    var roomPlayer = room[i];
+    if (roomPlayer.id === player.id) {
+      rmPlayer = i;
+    }
+  }
+  if (rmPlayer !== -1) {
+    room.splice(rmPlayer, 1);
+  }
+}
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+  players += 1;
+  var player = {'id': players, 'socket': socket};
+  var roomID = addPlayerToRoom(player);
+  console.log(roomID)
+  console.log(rooms)
+
+  socket.join(roomID);
+  socket.emit('room_id', roomID);
+
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+    removePlayer(player, roomID);
+    console.log(player)
+    console.log(rooms);
+  });
 });
