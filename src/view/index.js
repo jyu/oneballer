@@ -4,7 +4,7 @@ var arena = $('#arena'),
     maxValueY = arena.height() - player.height(),
     keysPressed = {},
     playerX = 140,
-    playerY = 140,
+    playerY = 200,
     projectiles = [],
     projectileID = 0,
     projSpeed = 8,
@@ -28,8 +28,7 @@ function calculateNewPlayerY(oldY, keyMinus, keyPlus) {
     return newY < 0 ? 0 : newY > maxValueY ? maxValueY : newY;
 }
 
-$(window).keydown(function(event) {
-  keysPressed[event.which] = true; });
+$(window).keydown(function(event) { keysPressed[event.which] = true; });
 $(window).keyup(function(event) { keysPressed[event.which] = false; });
 
 function calculateNewProjX(projectile) {
@@ -52,7 +51,7 @@ function calculateNewProjY(projectile) {
 
 setInterval(function() {
     player.css({
-        left: function(index ,oldValue) {
+        left: function(index, oldValue) {
             playerX = calculateNewPlayerX(oldValue, 65, 68);
             return playerX;
         },
@@ -61,11 +60,12 @@ setInterval(function() {
             return playerY;
         }
     });
+    socket.emit('player_position', { 'x': playerX, 'y': playerY });
     for(var i = 0; i < projectiles.length; i++) {
       var projectile = projectiles[i];
       if (isIntersect(playerX, playerY, projectile.x, projectile.y)) {
         alert("u died");
-        projectiles = [];
+        projectiles = []
       }
       $('#' + projectile.id).css({
         left: projectile.x = calculateNewProjX(projectile),
@@ -132,3 +132,20 @@ function getPosition(el) {
     y: yPosition
   };
 }
+
+// Opponent is flipped for player
+function flipX(x) {
+  return arena.width() - player.width() - x;
+}
+
+var socket = io();
+socket.on('room_full', function(msg){
+ $('#arena').append('<div id="opponent"></div>');
+});
+console.log(arena.width());
+socket.on('opponent_position', function(data){
+ $('#opponent').css({
+   left: flipX(data.x),
+   top: data.y
+ });
+});

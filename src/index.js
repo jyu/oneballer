@@ -68,16 +68,22 @@ io.on('connection', function(socket: Object){
   players += 1;
   var player = {'id': players, 'socket': socket};
   var roomInfo = addPlayerToRoom(player);
-  var roomID = roomInfo['roomID'];
+  var roomID = roomInfo.roomID;
   console.log(rooms)
   socket.join(roomID);
 
-  socket.to(roomID).emit('player '+String(player.id)+' connected');
-  socket.emit('room_id', roomID);
+  if (roomInfo.roomFull) {
+    io.in(roomID).emit('room_full', 'Room is full');
+  }
+
+  socket.on('player_position', function(data) {
+    socket.to(roomID).emit('opponent_position', data);
+  })
 
   socket.on('disconnect', function(){
     console.log('user disconnected');
     removePlayer(player, roomID);
+    io.in(roomID).emit('room_not_full', 'Room is not full. Player left.');
     console.log(rooms);
   });
 });

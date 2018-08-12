@@ -20,6 +20,17 @@
     position: absolute;
 }
 
+#opponent {
+    position:absolute; top:200px; left:640px;
+    width:20px; height:20px;
+    background-color:black;
+    border-radius: 50%;
+    behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+    background: blue;
+    border: 3px solid blue;
+    position: absolute;
+}
+
 .projectile {
   position:absolute;
   width:20px; height:20px;
