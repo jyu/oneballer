@@ -60,7 +60,9 @@ setInterval(function() {
             return playerY;
         }
     });
-    socket.emit('player_position', { 'x': playerX, 'y': playerY });
+    if (socket) {
+      socket.emit('player_position', { 'x': playerX, 'y': playerY });
+    }
     for(var i = 0; i < projectiles.length; i++) {
       var projectile = projectiles[i];
       if (isIntersect(playerX, playerY, projectile.x, projectile.y)) {
@@ -90,14 +92,17 @@ function getClickPosition(e) {
     projX += dx;
     projY += dy;
   }
-  projectiles.push({
-     'dx':  dx,
+  var projectile = {
+     'dx': dx,
      'dy': dy,
      'x': projX,
      'y': projY,
      'id': "projectile" + projectileID,
-   });
-  $('#arena').append('<div id="projectile' +  projectileID + '"class="projectile" style="top:' + playerY + 'px;left:' + playerX + 'px"></div>')
+   };
+   if (socket) {
+     socket.emit('new_projectile', projectile);
+   }
+   addProjectile(projectile);
   projectileID += 1;
 }
 
@@ -106,6 +111,11 @@ function isIntersect(x, y, projX, projY) {
   var yDiff = y - projY;
   var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
   return magnitude < 20;
+}
+
+function addProjectile(projectile) {
+  projectiles.push(projectile);
+  $('#arena').append('<div id="' +  projectile.id + '"class="projectile" style="top:' + projectile.y + 'px;left:' + projectile.x + 'px"></div>');
 }
 
 function getPosition(el) {
@@ -142,10 +152,22 @@ var socket = io();
 socket.on('room_full', function(msg){
  $('#arena').append('<div id="opponent"></div>');
 });
-console.log(arena.width());
+
 socket.on('opponent_position', function(data){
  $('#opponent').css({
    left: flipX(data.x),
    top: data.y
  });
+});
+
+socket.on('new_projectile', function(projectile){
+  console.log("hi")
+  var newProjectile = {
+     'dx': -1 * projectile.dx,
+     'dy': projectile.dy,
+     'x': flipX(projectile.x),
+     'y': projectile.y,
+     'id': "opponent-" + projectile.id,
+   };
+  addProjectile(newProjectile);
 });

@@ -80,6 +80,10 @@ io.on('connection', function(socket: Object){
     socket.to(roomID).emit('opponent_position', data);
   })
 
+  socket.on('new_projectile', function(data) {
+    socket.to(roomID).emit('new_projectile', data);
+  })
+
   socket.on('disconnect', function(){
     console.log('user disconnected');
     removePlayer(player, roomID);
