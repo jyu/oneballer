@@ -78,16 +78,20 @@ io.on('connection', function(socket: Object){
 
   socket.on('player_position', function(data) {
     socket.to(roomID).emit('opponent_position', data);
-  })
+  });
 
   socket.on('new_projectile', function(data) {
     socket.to(roomID).emit('new_projectile', data);
-  })
+  });
+
+  socket.on('game_over', function(data) {
+    socket.to(roomID).emit('game_over', data);
+  });
 
   socket.on('disconnect', function(){
     console.log('user disconnected');
     removePlayer(player, roomID);
-    io.in(roomID).emit('room_not_full', 'Room is not full. Player left.');
+    socket.to(roomID).emit('player_left', 'Room is not full. Player left.');
     console.log(rooms);
   });
 });

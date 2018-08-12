@@ -66,8 +66,11 @@ setInterval(function() {
     for(var i = 0; i < projectiles.length; i++) {
       var projectile = projectiles[i];
       if (isIntersect(playerX, playerY, projectile.x, projectile.y)) {
-        alert("u died");
-        projectiles = []
+        alert("U lost...");
+        if (socket) {
+          socket.emit('game_over', 'game_over');
+        }
+        projectiles = [];
       }
       $('#' + projectile.id).css({
         left: projectile.x = calculateNewProjX(projectile),
@@ -170,4 +173,12 @@ socket.on('new_projectile', function(projectile){
      'id': "opponent-" + projectile.id,
    };
   addProjectile(newProjectile);
+});
+
+socket.on('game_over', function(data){
+ alert("U WON THE GAME!")
+});
+
+socket.on('player_left', function(data) {
+  $('#opponent').remove();
 });
