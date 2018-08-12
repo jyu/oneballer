@@ -1,3 +1,18 @@
+//@flow
+
+type Projectile = {
+  'dx': number,
+  'dy': number,
+  'x': number,
+  'y': number,
+  'id': string,
+};
+
+type Position = {
+  'x': number,
+  'y': number
+}
+
 var arena = $('#arena'),
     player = $('#player'),
     maxValueX = arena.width() - player.width(),
@@ -10,29 +25,33 @@ var arena = $('#arena'),
     projSpeed = 8,
     playerSpeed = 5;
 
-var arenaDim = getPosition(document.getElementById("arena"));
+var arenaElement = document.getElementById("arena");
+if (arenaElement === null) {
+  throw(new Error);
+}
+var arenaDim = getPosition(arenaElement);
 var arenaX = arenaDim.x;
 var arenaY = arenaDim.y;
 
-function calculateNewPlayerX(oldX, keyMinus, keyPlus) {
-    var newX = parseInt(oldX, 10)
-                   - (keysPressed[keyMinus] ? playerSpeed : 0)
-                   + (keysPressed[keyPlus] ? playerSpeed : 0);
-    return newX < 0 ? 0 : newX > maxValueX ? maxValueX : newX;
+function calculateNewPlayerX(oldX: number, keyMinus: number, keyPlus: number): number {
+  var newX = parseInt(oldX, 10)
+             - (keysPressed[keyMinus] ? playerSpeed : 0)
+             + (keysPressed[keyPlus] ? playerSpeed : 0);
+  return newX < 0 ? 0 : newX > maxValueX ? maxValueX : newX;
 }
 
-function calculateNewPlayerY(oldY, keyMinus, keyPlus) {
-    var newY = parseInt(oldY, 10)
-                   - (keysPressed[keyMinus] ? playerSpeed : 0)
-                   + (keysPressed[keyPlus] ? playerSpeed : 0);
-    return newY < 0 ? 0 : newY > maxValueY ? maxValueY : newY;
+function calculateNewPlayerY(oldY: number, keyMinus: number, keyPlus: number): number {
+  var newY = parseInt(oldY, 10)
+             - (keysPressed[keyMinus] ? playerSpeed : 0)
+             + (keysPressed[keyPlus] ? playerSpeed : 0);
+  return newY < 0 ? 0 : newY > maxValueY ? maxValueY : newY;
 }
 
-$(window).keydown(function(event) { keysPressed[event.which] = true; });
-$(window).keyup(function(event) { keysPressed[event.which] = false; });
+$(window).keydown(function(event: KeyboardEvent) { keysPressed[event.which] = true; });
+$(window).keyup(function(event: KeyboardEvent) { keysPressed[event.which] = false; });
 
-function calculateNewProjX(projectile) {
-  newX = projectile.x + projectile.dx;
+function calculateNewProjX(projectile: Projectile): number {
+  var newX = projectile.x + projectile.dx;
   if (newX > maxValueX || newX < 0) {
     projectile.dx = projectile.dx * -1;
     return projectile.x;
@@ -40,8 +59,8 @@ function calculateNewProjX(projectile) {
   return newX;
 }
 
-function calculateNewProjY(projectile) {
-  newY = projectile.y + projectile.dy;
+function calculateNewProjY(projectile: Projectile): number {
+  var newY = projectile.y + projectile.dy;
   if (newY > maxValueY || newY < 0) {
     projectile.dy = projectile.dy * -1;
     return projectile.y;
@@ -81,7 +100,7 @@ setInterval(function() {
 
 arena.click(getClickPosition);
 
-function getClickPosition(e) {
+function getClickPosition(e: MouseEvent) {
   var xPosition = e.clientX - arenaX;
   var yPosition = e.clientY - arenaY;
   var xDiff = xPosition - playerX;
@@ -116,19 +135,21 @@ function isIntersect(x, y, projX, projY) {
   return magnitude < 20;
 }
 
-function addProjectile(projectile) {
+function addProjectile(projectile: Projectile): void {
   projectiles.push(projectile);
   $('#arena').append('<div id="' +  projectile.id + '"class="projectile" style="top:' + projectile.y + 'px;left:' + projectile.x + 'px"></div>');
 }
 
-function getPosition(el) {
+function getPosition(el: HTMLElement): Position {
   var xPosition = 0;
   var yPosition = 0;
 
   while (el) {
     if (el.tagName == "BODY") {
       // deal with browser quirks with body/window/document and page scroll
+      // $FlowFixMe
       var xScrollPos = el.scrollLeft || document.documentElement.scrollLeft;
+      // $FlowFixMe
       var yScrollPos = el.scrollTop || document.documentElement.scrollTop;
 
       xPosition += (el.offsetLeft - xScrollPos + el.clientLeft);
@@ -137,7 +158,7 @@ function getPosition(el) {
       xPosition += (el.offsetLeft - el.scrollLeft + el.clientLeft);
       yPosition += (el.offsetTop - el.scrollTop + el.clientTop);
     }
-
+    // $FlowFixMe
     el = el.offsetParent;
   }
   return {
@@ -151,6 +172,7 @@ function flipX(x) {
   return arena.width() - player.width() - x;
 }
 
+// $FlowFixMe
 var socket = io();
 socket.on('room_full', function(msg){
  $('#arena').append('<div id="opponent"></div>');
@@ -164,7 +186,6 @@ socket.on('opponent_position', function(data){
 });
 
 socket.on('new_projectile', function(projectile){
-  console.log("hi")
   var newProjectile = {
      'dx': -1 * projectile.dx,
      'dy': projectile.dy,
