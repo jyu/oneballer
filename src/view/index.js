@@ -24,7 +24,7 @@ var arena = $('#arena'),
     projectileID = 0,
     projSpeed = 8,
     playerSpeed = 5,
-    gameOver = false;
+    gameOver = true;
 
 var arenaElement = document.getElementById("arena");
 if (arenaElement === null) {
@@ -198,6 +198,7 @@ function flipX(x: number): number {
 // $FlowFixMe
 var socket = io();
 socket.on('room_full', function(msg){
+ gameOver = false;
  $('#status').text('Opponent found, GAME STARTS');
  $('#arena').append('<div id="opponent"></div>');
 });
