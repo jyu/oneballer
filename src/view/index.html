@@ -5,10 +5,18 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="/css/site.css">
     <title>One Baller</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
 </head>
 <body>
+  <div id="header">
+    <h1> Welcome to Baller <h1>
+    <h3> There can only be one baller </h3>
+    <h3> WASD to move, point to shoot </h3>
+    <span> Game status: </span>
+    <span id="status"> Waiting for opponent </span>
+  </div>
   <div id="arena">
-      <div id="player"></div>
+    <div id="player"></div>
   </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>

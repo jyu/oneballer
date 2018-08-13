@@ -23,7 +23,8 @@ var arena = $('#arena'),
     projectiles = [],
     projectileID = 0,
     projSpeed = 8,
-    playerSpeed = 5;
+    playerSpeed = 5,
+    gameOver = false;
 
 var arenaElement = document.getElementById("arena");
 if (arenaElement === null) {
@@ -47,8 +48,16 @@ function calculateNewPlayerY(oldY: number, keyMinus: number, keyPlus: number): n
   return newY < 0 ? 0 : newY > maxValueY ? maxValueY : newY;
 }
 
-$(window).keydown(function(event: KeyboardEvent) { keysPressed[event.which] = true; });
-$(window).keyup(function(event: KeyboardEvent) { keysPressed[event.which] = false; });
+$(window).keydown(function(event: KeyboardEvent) {
+  if (gameOver) {
+    return;
+  }
+  keysPressed[event.which] = true; });
+$(window).keyup(function(event: KeyboardEvent) {
+  if (gameOver) {
+    return;
+  }
+  keysPressed[event.which] = false; });
 
 function calculateNewProjX(projectile: Projectile): number {
   var newX = projectile.x + projectile.dx;
@@ -85,11 +94,10 @@ setInterval(function() {
     for(var i = 0; i < projectiles.length; i++) {
       var projectile = projectiles[i];
       if (isIntersect(playerX, playerY, projectile.x, projectile.y)) {
-        alert("U lost...");
         if (socket) {
           socket.emit('game_over', 'game_over');
         }
-        projectiles = [];
+        endGame(false);
       }
       $('#' + projectile.id).css({
         left: projectile.x = calculateNewProjX(projectile),
@@ -100,7 +108,10 @@ setInterval(function() {
 
 arena.click(getClickPosition);
 
-function getClickPosition(e: MouseEvent) {
+function getClickPosition(e: MouseEvent): void {
+  if (gameOver) {
+    return;
+  }
   var xPosition = e.clientX - arenaX;
   var yPosition = e.clientY - arenaY;
   var xDiff = xPosition - playerX;
@@ -111,8 +122,8 @@ function getClickPosition(e: MouseEvent) {
   var projX = playerX;
   var projY = playerY;
   while(isIntersect(playerX, playerY, projX, projY)) {
-    projX += dx;
-    projY += dy;
+    projX += 2 * dx;
+    projY += 2 * dy;
   }
   var projectile = {
      'dx': dx,
@@ -167,14 +178,27 @@ function getPosition(el: HTMLElement): Position {
   };
 }
 
+function endGame(didWin: bool): void {
+  if (didWin) {
+    alert("U WON THE GAME!");
+    $('#status').text('GAME OVER YOU WON, Refresh to start a new game');
+  } else {
+    alert("U lost the game...");
+    $('#status').text('GAME OVER YOU LOST, Refresh to start a new game');
+  }
+  projectiles = [];
+  gameOver = true;
+}
+
 // Opponent is flipped for player
-function flipX(x) {
+function flipX(x: number): number {
   return arena.width() - player.width() - x;
 }
 
 // $FlowFixMe
 var socket = io();
 socket.on('room_full', function(msg){
+ $('#status').text('Opponent found, GAME STARTS');
  $('#arena').append('<div id="opponent"></div>');
 });
 
@@ -197,9 +221,10 @@ socket.on('new_projectile', function(projectile){
 });
 
 socket.on('game_over', function(data){
- alert("U WON THE GAME!")
+ endGame(true);
 });
 
 socket.on('player_left', function(data) {
+  $('#status').text('Waiting for Opponent');
   $('#opponent').remove();
 });

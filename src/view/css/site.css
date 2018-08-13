@@ -37,3 +37,7 @@
   border-radius: 50%;
   background: green;
 }
+
+#header {
+  margin-left: 20px;
+}
