@@ -179,6 +179,8 @@ function getPosition(el: HTMLElement): Position {
 }
 
 function endGame(didWin: bool): void {
+  $('#arena').empty();
+  $('#arena').html('<div id="player"></div>');
   if (didWin) {
     alert("U WON THE GAME!");
     $('#status').text('GAME OVER YOU WON, Refresh to start a new game');
@@ -198,9 +200,16 @@ function flipX(x: number): number {
 // $FlowFixMe
 var socket = io();
 socket.on('room_full', function(msg){
- gameOver = false;
- $('#status').text('Opponent found, GAME STARTS');
- $('#arena').append('<div id="opponent"></div>');
+ $('#status').text('Opponent found, GAME STARTS IN 3');
+ setTimeout(function(){ $('#status').text('Opponent found, GAME STARTS IN 2'); }, 1000);
+ setTimeout(function(){ $('#status').text('Opponent found, GAME STARTS IN 1'); }, 2000);
+ setTimeout(function(){
+   $('#status').text('GAME STARTS NOW');
+   $('#arena').append('<div id="opponent"></div>');
+   gameOver = false;
+   playerX = 140;
+   playerY = 200;
+ }, 3000);
 });
 
 socket.on('opponent_position', function(data){
