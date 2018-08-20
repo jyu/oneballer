@@ -9,7 +9,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json())
-app.use(express.static(__dirname + '/view'));
+app.use(express.static(__dirname + '/client'));
 // $FlowFixMe
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -20,7 +20,7 @@ console.log("App now running on port", port);
 });
 
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/view/index.html');
+  res.sendFile(__dirname + '/client/index.html');
 });
 
 var players = 0;
