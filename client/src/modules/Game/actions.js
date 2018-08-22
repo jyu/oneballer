@@ -5,10 +5,21 @@ export function reset() {
   };
 }
 
-export const UPDATE_PLAYER = "UPDATE_PLAYER";
-export function updatePlayer() {
+export const ADD_PROJECTILE = "ADD_PROJECTILE";
+export function addProjectile(clickX, clickY) {
   return {
-    type: UPDATE_PLAYER,
+    type: ADD_PROJECTILE,
+    payload: {
+      clickX: clickX,
+      clickY: clickY,
+    }
+  };
+}
+
+export const UPDATE_GAME = "UPDATE_GAME";
+export function updateGame() {
+  return {
+    type: UPDATE_GAME,
   };
 }
 

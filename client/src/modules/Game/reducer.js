@@ -5,11 +5,13 @@ var init = {
   playerX: 140,
   playerY: 200,
   keyPressed: {'w': false, 'a': false, 's': false, 'd': false},
+  projectiles: [],
 }
 
 var width = 766,
     height = 366,
-    playerSpeed = 5;
+    playerSpeed = 5,
+    projSpeed = 3;
 
 init = Map(fromJS(init));
 
@@ -19,9 +21,37 @@ export default function reducer(state=init, action) {
       state = init;
       break;
     }
-    case 'UPDATE_PLAYER': {
+    case 'ADD_PROJECTILE': {
+      var xPosition = action.payload.clickX;
+      var yPosition = action.payload.clickY;
+      var playerX = state.get('playerX');
+      var playerY = state.get('playerY');
+      var xDiff = xPosition - playerX;
+      var yDiff = yPosition - playerY;
+      var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+      var dx = projSpeed * xDiff / magnitude;
+      var dy = projSpeed * yDiff / magnitude
+      var projX = playerX;
+      var projY = playerY;
+      while(isIntersect(playerX, playerY, projX, projY)) {
+        projX += 2 * dx;
+        projY += 2 * dy;
+      }
+      var projectile = {
+         'dx': dx,
+         'dy': dy,
+         'x': projX,
+         'y': projY,
+       };
+      let newProjectiles = state.get('projectiles').push(projectile);
+      state = state.set('projectiles', newProjectiles);
+      break;
+    }
+    case 'UPDATE_GAME': {
+      // Projeciles
+
+      // Player keypress
       var keyPressed = state.get('keyPressed');
-      console.log(keyPressed)
       var y = state.get('playerY');
       if (keyPressed.get('w')) {
         y += playerSpeed * -1;
@@ -80,3 +110,10 @@ export default function reducer(state=init, action) {
   }
   return state;
 };
+
+function isIntersect(x, y, projX, projY) {
+  var xDiff = x - projX;
+  var yDiff = y - projY;
+  var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+  return magnitude < 20;
+}

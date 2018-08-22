@@ -2,9 +2,10 @@ import React from 'react';
 import { connect } from 'react-redux';
 import 'whatwg-fetch';
 
-import { reset, updatePlayer, addKeyW, addKeyA, addKeyS, addKeyD, removeKeyW,
-         removeKeyA, removeKeyS, removeKeyD,
+import { reset, updateGame, addKeyW, addKeyA, addKeyS, addKeyD, removeKeyW,
+         removeKeyA, removeKeyS, removeKeyD, addProjectile
 } from './actions';
+import Projectile from './Projectile';
 
 import './index.css';
 
@@ -12,14 +13,18 @@ const mapStateToProps = store => ({
   playerX: store.Game.get( 'playerX' ),
   playerY: store.Game.get( 'playerY' ),
   keyPressed: store.Game.get( 'keyPressed' ),
+  projectiles: store.Game.get( 'projectiles' ),
 });
 
 const mapDispatchToProps = dispatch => ({
   reset: () => {
     dispatch( reset() );
   },
-  updatePlayer: () => {
-    dispatch( updatePlayer() );
+  addProjectile: (clickX, clickY) => {
+    dispatch( addProjectile(clickX, clickY) );
+  },
+  updateGame: () => {
+    dispatch( updateGame() );
   },
   addKeyW: () => {
     dispatch( addKeyW() );
@@ -52,9 +57,9 @@ class Game extends React.Component {
   componentWillMount() {
     document.addEventListener( 'keydown', this.keyDownHandler.bind( this ) );
     document.addEventListener( 'keyup', this.keyUpHandler.bind( this ) );
-    let updatePlayer = this.props.updatePlayer;
+    let updateGame = this.props.updateGame;
     setInterval(function() {
-      updatePlayer();
+      updateGame();
     }, 20);
   }
 
@@ -77,19 +82,27 @@ class Game extends React.Component {
   keyDownHandler( event ) {
     switch (event.key) {
       case 'w': {
-        this.props.addKeyW();
+        if (!this.props.keyPressed.get('w')) {
+          this.props.addKeyW();
+        }
         break;
       }
       case 'a': {
-        this.props.addKeyA();
+        if (!this.props.keyPressed.get('a')) {
+          this.props.addKeyA();
+        }
         break;
       }
       case 's': {
-        this.props.addKeyS();
+        if (!this.props.keyPressed.get('s')) {
+          this.props.addKeyS();
+        }
         break;
       }
       case 'd': {
-        this.props.addKeyD();
+        if (!this.props.keyPressed.get('d')) {
+          this.props.addKeyD();
+        }
         break;
       }
       default:
@@ -120,6 +133,16 @@ class Game extends React.Component {
     }
   }
 
+  onClickHandler(e) {
+    var clickX = e.nativeEvent.offsetX;
+    var clickY = e.nativeEvent.offsetY;
+    this.props.addProjectile(clickX, clickY);
+  }
+
+  renderProjectiles() {
+    return this.props.projectiles.map((projectile, index) => <Projectile projX={projectile.x} projY={projectile.y} key={index}/>);
+  }
+
   render() {
     const playerStyle = {
       top: this.props.playerY,
@@ -128,8 +151,9 @@ class Game extends React.Component {
     return (
     <div>
       { this.getHeader() }
-      <div id="arena">
+      <div id="arena" onClick={ this.onClickHandler.bind(this) } tabIndex="0">
         <div id="player" style={ playerStyle }></div>
+        {this.renderProjectiles()}
       </div>
     </div>);
   }
