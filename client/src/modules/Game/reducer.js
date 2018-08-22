@@ -1,14 +1,14 @@
 import { Map, fromJS } from 'immutable';
 
 
-var init = {
+let init = {
   playerX: 140,
   playerY: 200,
   keyPressed: {'w': false, 'a': false, 's': false, 'd': false},
   projectiles: [],
 }
 
-var width = 766,
+let width = 766,
     height = 366,
     playerSpeed = 5,
     projSpeed = 3;
@@ -22,22 +22,22 @@ export default function reducer(state=init, action) {
       break;
     }
     case 'ADD_PROJECTILE': {
-      var xPosition = action.payload.clickX;
-      var yPosition = action.payload.clickY;
-      var playerX = state.get('playerX');
-      var playerY = state.get('playerY');
-      var xDiff = xPosition - playerX;
-      var yDiff = yPosition - playerY;
-      var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-      var dx = projSpeed * xDiff / magnitude;
-      var dy = projSpeed * yDiff / magnitude
-      var projX = playerX;
-      var projY = playerY;
+      let xPosition = action.payload.clickX;
+      let yPosition = action.payload.clickY;
+      let playerX = state.get('playerX');
+      let playerY = state.get('playerY');
+      let xDiff = xPosition - playerX;
+      let yDiff = yPosition - playerY;
+      let magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+      let dx = projSpeed * xDiff / magnitude;
+      let dy = projSpeed * yDiff / magnitude
+      let projX = playerX;
+      let projY = playerY;
       while(isIntersect(playerX, playerY, projX, projY)) {
         projX += 2 * dx;
         projY += 2 * dy;
       }
-      var projectile = {
+      let projectile = {
          'dx': dx,
          'dy': dy,
          'x': projX,
@@ -49,10 +49,21 @@ export default function reducer(state=init, action) {
     }
     case 'UPDATE_GAME': {
       // Projeciles
-
+      let newProjectiles = state.get('projectiles')
+      .map(projectile => {
+        let xInfo = calculateNewProjX(projectile);
+        let yInfo = calculateNewProjY(projectile);
+        return {
+          'dx': xInfo.dx,
+          'dy': yInfo.dy,
+          'x': xInfo.x,
+          'y': yInfo.y,
+        };
+      })
+      state = state.set('projectiles', newProjectiles);
       // Player keypress
-      var keyPressed = state.get('keyPressed');
-      var y = state.get('playerY');
+      let keyPressed = state.get('keyPressed');
+      let y = state.get('playerY');
       if (keyPressed.get('w')) {
         y += playerSpeed * -1;
       }
@@ -60,7 +71,7 @@ export default function reducer(state=init, action) {
         y += playerSpeed;
       }
       y = y < 0 ? 0 : y > height ? height : y;
-      var x = state.get('playerX');
+      let x = state.get('playerX');
       if (keyPressed.get('a')) {
         x += playerSpeed * -1;
       }
@@ -112,8 +123,27 @@ export default function reducer(state=init, action) {
 };
 
 function isIntersect(x, y, projX, projY) {
-  var xDiff = x - projX;
-  var yDiff = y - projY;
-  var magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+  let xDiff = x - projX;
+  let yDiff = y - projY;
+  let magnitude = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
   return magnitude < 20;
+}
+
+
+function calculateNewProjX(projectile): number {
+  let newX = projectile.x + projectile.dx;
+  if (newX > width || newX < 0) {
+    let dx = projectile.dx * -1;
+    return {'x': projectile.x, 'dx': dx};
+  }
+  return {'x': newX, 'dx': projectile.dx};
+}
+
+function calculateNewProjY(projectile): number {
+  let newY = projectile.y + projectile.dy;
+  if (newY > height || newY < 0) {
+    let dy = projectile.dy * -1;
+    return {'y': projectile.y, 'dy': dy};
+  }
+  return {'y': newY, 'dy': projectile.dy};
 }
