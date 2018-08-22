@@ -1,75 +1,82 @@
-import { Map, fromJS, List } from 'immutable';
+import { Map, fromJS } from 'immutable';
+
 
 var init = {
-    searchValue: "",
-    recentColor: "",
-    recentItem: "",
-    docs: [],
-    stockSuccess: "",
-    requestSuccess: "",
-    similar: [],
-    aisle: "",
-    bin_id: "",
-    tower_id: -1,
+  playerX: 140,
+  playerY: 200,
+  keyPressed: {'w': false, 'a': false, 's': false, 'd': false},
 }
+
+var width = 766,
+    height = 366,
+    playerSpeed = 5;
 
 init = Map(fromJS(init));
 
 export default function reducer(state=init, action) {
-    switch(action.type) {
-        case 'CLEAR_DOCS': {
-            state = state.set("docs", List());
-            state = state.set("recentItem", "");
-            state = state.set("recentColor", "");
-            state = state.set("stockSuccess", "");
-            state = state.set("requestSuccess", "");
-            break;
-        }
-        case 'HARD_CLEAR_DOCS': {
-            state = state.set("docs", List());
-            state = state.set("searchValue", "");
-            state = state.set("recentItem", "");
-            state = state.set("recentColor", "");
-            state = state.set("similar", []);
-            state = state.set("aisle", "");
-            state = state.set("bin_id", "");
-            state = state.set("stockSuccess", "");
-            state = state.set("requestSuccess", "");
-            break;
-        }
-        case 'SET_DOCS': {
-            state = state.set("docs", List(action.payload));
-            break;
-        }
-        case 'SET_SEARCH_VALUE': {
-            state = state.set("searchValue", action.payload);
-            state = state.set("stockSuccess", "");
-            state = state.set("requestSuccess", "");
-            break;
-        }
-        case 'SET_SEARCH_RESULT': {
-            state = state.set("recentColor", action.payload.color);
-            state = state.set("recentItem", action.payload.name);
-            state = state.set("similar", action.payload.similar);
-            state = state.set("aisle", action.payload.aisle);
-            state = state.set("bin_id", action.payload.bin_id);
-            break;
-        }
-        case 'SET_STOCK_SUCCESS': {
-            state = state.set("stockSuccess", action.payload);
-            break;
-        }
-        case 'SET_REQUEST_SUCCESS': {
-            state = state.set("requestSuccess", action.payload);
-            break;
-        }
-        case 'SET_TOWER_ID': {
-            state = state.set("tower_id", action.payload);
-            break;
-        }
-        default: {
-            break;
-        }
+  switch(action.type) {
+    case 'RESET': {
+      state = init;
+      break;
     }
-    return state;
+    case 'UPDATE_PLAYER': {
+      var keyPressed = state.get('keyPressed');
+      console.log(keyPressed)
+      var y = state.get('playerY');
+      if (keyPressed.get('w')) {
+        y += playerSpeed * -1;
+      }
+      if (keyPressed.get('s')) {
+        y += playerSpeed;
+      }
+      y = y < 0 ? 0 : y > height ? height : y;
+      var x = state.get('playerX');
+      if (keyPressed.get('a')) {
+        x += playerSpeed * -1;
+      }
+      if (keyPressed.get('d')) {
+        x += playerSpeed;
+      }
+      x = x < 0 ? 0 : x > width ? width : x;
+      state = state.set('playerX', x);
+      state = state.set('playerY', y);
+      break;
+    }
+    case 'ADD_KEY_W': {
+      state = state.setIn(['keyPressed', 'w'], true);
+      break;
+    }
+    case 'ADD_KEY_A': {
+      state = state.setIn(['keyPressed', 'a'], true);
+      break;
+    }
+    case 'ADD_KEY_S': {
+      state = state.setIn(['keyPressed', 's'], true);
+      break;
+    }
+    case 'ADD_KEY_D': {
+      state = state.setIn(['keyPressed', 'd'], true);
+      break;
+    }
+    case 'REMOVE_KEY_W': {
+      state = state.setIn(['keyPressed', 'w'], false);
+      break;
+    }
+    case 'REMOVE_KEY_A': {
+      state = state.setIn(['keyPressed', 'a'], false);
+      break;
+    }
+    case 'REMOVE_KEY_S': {
+      state = state.setIn(['keyPressed', 's'], false);
+      break;
+    }
+    case 'REMOVE_KEY_D': {
+      state = state.setIn(['keyPressed', 'd'], false);
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  return state;
 };
